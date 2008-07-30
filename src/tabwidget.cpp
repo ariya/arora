@@ -68,6 +68,7 @@
 #include "tabbar.h"
 #include "locationbar.h"
 #include "webactionmapper.h"
+#include "webpreview.h"
 #include "webview.h"
 #include "webviewsearch.h"
 
@@ -95,6 +96,7 @@ TabWidget::TabWidget(QWidget *parent)
     , m_lineEditCompleter(0)
     , m_lineEdits(0)
     , m_tabBar(new TabBar(this))
+    , m_preview(new WebPreview)
 {
     setElideMode(Qt::ElideRight);
 
@@ -108,6 +110,7 @@ TabWidget::TabWidget(QWidget *parent)
     connect(m_tabBar, SIGNAL(closeOtherTabs(int)), this, SLOT(closeOtherTabs(int)));
     connect(m_tabBar, SIGNAL(reloadTab(int)), this, SLOT(reloadTab(int)));
     connect(m_tabBar, SIGNAL(reloadAllTabs()), this, SLOT(reloadAllTabs()));
+    connect(m_tabBar, SIGNAL(hoverTabChanged(int)), this, SLOT(updateWebPreview(int)));
 #if QT_VERSION < 0x040500
     connect(m_tabBar, SIGNAL(tabMoveRequested(int, int)), this, SLOT(moveTab(int, int)));
 #endif
@@ -190,6 +193,11 @@ TabWidget::TabWidget(QWidget *parent)
     m_lineEdits = new QStackedWidget(this);
 }
 
+TabWidget::~TabWidget()
+{
+    delete m_preview;
+}
+
 void TabWidget::clear()
 {
     // clear the recently closed tabs
@@ -250,6 +258,8 @@ void TabWidget::addWebAction(QAction *action, QWebPage::WebAction webAction)
 
 void TabWidget::currentChanged(int index)
 {
+    m_preview->track(0);
+
     WebView *webView = this->webView(index);
     if (!webView)
         return;
@@ -796,6 +806,23 @@ void TabWidget::previousTab()
     if (next < 0)
         next = count() - 1;
     setCurrentIndex(next);
+}
+
+void TabWidget::updateWebPreview(int tab)
+{
+    WebView *view = webView(tab);
+    QUrl url = view ? view->url() : QUrl();
+    if (!view || !url.isValid() || tab == currentIndex()) {
+        m_preview->track(0);
+        return;
+    }
+
+    m_preview->track(webView(tab));
+
+    QRect r = tabBar()->tabRect(tab);
+    int x = r.left() + r.width() / 2;
+    int y = r.bottom();
+    m_preview->move(tabBar()->mapToGlobal(QPoint(x, y)));
 }
 
 static const qint32 TabWidgetMagic = 0xaa;

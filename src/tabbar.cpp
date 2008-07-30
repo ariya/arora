@@ -1,5 +1,6 @@
 /*
  * Copyright 2008 Benjamin C. Meyer <ben@meyerhome.net>
+ * Copyright 2008 Ariya Hidayat <ariya.hidayat@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,9 +88,11 @@ TabBar::TabBar(QWidget *parent)
     : QTabBar(parent)
     , m_viewTabBarAction(0)
     , m_showTabBarWhenOneTab(true)
+    , m_hoverTab(-1)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     setAcceptDrops(true);
+    setMouseTracking(true);
     setElideMode(Qt::ElideRight);
     setUsesScrollButtons(true);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -212,6 +215,20 @@ void TabBar::closeOtherTabs()
     }
 }
 
+bool TabBar::event(QEvent *event)
+{
+    if (event->type() == QEvent::Leave)
+        emit hoverTabChanged(-1);
+
+    if (event->type() == QEvent::Enter)
+        emit hoverTabChanged(m_hoverTab);
+
+    if (event->type() == QEvent::FocusOut)
+        emit hoverTabChanged(-1);
+
+    return QTabBar::event(event);
+}
+
 void TabBar::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (!childAt(event->pos())
@@ -272,6 +289,15 @@ void TabBar::mouseMoveEvent(QMouseEvent *event)
             drag->exec();
         }
     }
+
+    if (event->buttons() == Qt::NoButton) {
+        int index = tabAt(event->pos());
+        if (index != m_hoverTab) {
+            m_hoverTab = index;
+            emit hoverTabChanged(m_hoverTab);
+        }
+    }
+
     QTabBar::mouseMoveEvent(event);
 }
 

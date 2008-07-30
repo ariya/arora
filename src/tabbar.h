@@ -1,5 +1,6 @@
 /*
  * Copyright 2008 Benjamin C. Meyer <ben@meyerhome.net>
+ * Copyright 2008 Ariya Hidayat <ariya.hidayat@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,6 +82,7 @@ signals:
     void closeOtherTabs(int index);
     void reloadTab(int index);
     void reloadAllTabs();
+    void hoverTabChanged(int tab);
 #if QT_VERSION < 0x040500
     void tabMoveRequested(int fromIndex, int toIndex);
 #endif
@@ -97,6 +99,7 @@ public:
 #endif
 
 protected:
+    bool event(QEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent* event);
@@ -126,6 +129,7 @@ private:
     QPoint m_dragStartPos;
     QAction *m_viewTabBarAction;
     bool m_showTabBarWhenOneTab;
+    int m_hoverTab;
 };
 
 

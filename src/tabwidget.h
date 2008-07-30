@@ -77,6 +77,7 @@ class QStackedWidget;
 QT_END_NAMESPACE
 
 class TabBar;
+class WebPreview;
 class WebView;
 class WebActionMapper;
 class WebViewSearch;
@@ -115,6 +116,7 @@ public:
     };
 
     TabWidget(QWidget *parent = 0);
+    ~TabWidget();
     TabBar *tabBar() { return m_tabBar; }
     void clear();
     void addWebAction(QAction *action, QWebPage::WebAction webAction);
@@ -173,6 +175,7 @@ private slots:
     void menuBarVisibilityChangeRequestedCheck(bool visible);
     void statusBarVisibilityChangeRequestedCheck(bool visible);
     void toolBarVisibilityChangeRequestedCheck(bool visible);
+    void updateWebPreview(int tab);
 
 private:
     QLabel *animationLabel(int index, bool addMovie);
@@ -191,6 +194,8 @@ private:
     QCompleter *m_lineEditCompleter;
     QStackedWidget *m_lineEdits;
     TabBar *m_tabBar;
+
+    WebPreview *m_preview;
 };
 
 #endif // TABWIDGET_H
