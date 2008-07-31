@@ -88,7 +88,8 @@ void WebPreview::updatePreview(const QRect& rect)
 
     QPainter p(&m_pixmap);
 
-    // comment the next line for old & slow system
+    // comment the next lines for old & slow system
+    p.setRenderHint(QPainter::Antialiasing, true);
     p.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
     p.scale(m_scalingFactor, m_scalingFactor);
