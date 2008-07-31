@@ -20,14 +20,23 @@
 #ifndef WEBPREVIEW_H
 #define WEBPREVIEW_H
 
+#include <QGLWidget>
 #include <QPixmap>
 #include <QPointer>
 #include <QTimer>
 #include <QWidget>
 
+// uncomment to enable OpenGL-based preview widget
+// should be faster on system with hardware accelerated graphics driver
+// #define WEBPREVIEW_OPENGL
+
 class QWebView;
 
+#ifdef WEBPREVIEW_OPENGL
+class WebPreview : public QGLWidget
+#else
 class WebPreview : public QWidget
+#endif
 {
     Q_OBJECT
 

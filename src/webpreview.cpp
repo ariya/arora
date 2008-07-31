@@ -33,7 +33,11 @@ const qreal preview_opacity = 0.8;
 
 
 WebPreview::WebPreview(QWidget *parent)
+#ifdef WEBPREVIEW_OPENGL
+    : QGLWidget(parent)
+#else
     : QWidget(parent)
+#endif
     , m_view(0)
     , m_scalingFactor(0.25)
 {
@@ -96,7 +100,11 @@ void WebPreview::updatePreview(const QRect& rect)
 
 void WebPreview::paintEvent(QPaintEvent *event)
 {
+#ifdef WEBPREVIEW_OPENGL
+    QGLWidget::paintEvent(event);
+#else
     QWidget::paintEvent(event);
+#endif
 
     QColor bgcolor = Qt::white;
     if (m_view)

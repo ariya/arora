@@ -13,6 +13,7 @@ MOC_DIR = .moc
 OBJECTS_DIR = .obj
 
 QT += webkit network
+QT += opengl
 
 GITVERSION=$$system(git log -n1 --pretty=format:%h)
 GITCHANGENUMBER=$$system(git log --pretty=format:%h | wc -l)
