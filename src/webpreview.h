@@ -43,6 +43,7 @@ private:
     QPointer<QWebView> m_view;
     QPixmap m_pixmap;
     QPixmap m_thumbnail;
+    QTimer m_showTimer;
     QTimer m_repaintTimer;
 
 private slots:

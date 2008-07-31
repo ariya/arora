@@ -34,6 +34,11 @@ WebPreview::WebPreview(QWidget *parent)
     : QFrame(parent)
     , m_view(0)
 {
+    m_showTimer.setInterval(500);
+    m_showTimer.setSingleShot(true);
+    connect(&m_showTimer, SIGNAL(timeout()),
+            this, SLOT(show()));
+
     m_repaintTimer.setInterval(100);
     connect(&m_repaintTimer, SIGNAL(timeout()),
             this, SLOT(updatePreview()));
@@ -54,6 +59,7 @@ void WebPreview::track(QWebView *view)
 
     m_view = view;
     if (!m_view) {
+        m_showTimer.stop();
         m_repaintTimer.stop();
         hide();
     } else {
@@ -77,7 +83,7 @@ void WebPreview::track(QWebView *view)
         m_thumbnail = QPixmap(m_pixmap.size() / factor);
 
         if (!isVisible())
-            QTimer::singleShot(500, this, SLOT(show()));
+            m_showTimer.start();
     }
 }
 
