@@ -27,13 +27,18 @@
 
 const int preview_width = 200;
 const int preview_height = 150;
-const int preview_margin = 10;
+const int preview_ofs = 10;
+
+const qreal preview_opacity = 0.8;
 
 
 WebPreview::WebPreview(QWidget *parent)
-    : QFrame(parent)
+    : QWidget(parent)
     , m_view(0)
+    , m_scalingFactor(0.25)
 {
+    m_pixmap = QPixmap(preview_width, preview_height);
+
     m_showTimer.setInterval(500);
     m_showTimer.setSingleShot(true);
     connect(&m_showTimer, SIGNAL(timeout()),
@@ -42,14 +47,8 @@ WebPreview::WebPreview(QWidget *parent)
     m_repaintTimer.setInterval(100);
     connect(&m_repaintTimer, SIGNAL(timeout()),
             this, SLOT(updatePreview()));
-    setWindowFlags(windowFlags() | Qt::ToolTip);
 
-    setFrameStyle(QFrame::Box | QFrame::Raised);
-    setLineWidth(1);
-
-    int w = preview_width + 2 * preview_margin;
-    int h = preview_height + 2 * preview_margin;
-    setFixedSize(w, h);
+    setFixedSize(preview_width + 4, preview_height + preview_ofs + 4);
 }
 
 void WebPreview::track(QWebView *view)
@@ -65,22 +64,11 @@ void WebPreview::track(QWebView *view)
     } else {
         m_repaintTimer.start();
 
-        if (m_pixmap.size() != m_view->size()) {
-            int w = m_view->width();
-            int h = m_view->height();
-            QString key = QString("arora_webpreview_%1_%2").arg(w).arg(h);
-            QPixmap pm;
-            if (!QPixmapCache::find(key, pm)) {
-                pm = QPixmap(m_view->size());
-                QPixmapCache::insert(key, pm);
-            }
-            m_pixmap = pm;
-        }
+        qreal xf = qreal(m_pixmap.width()) / m_view->width();
+        qreal yf = qreal(m_pixmap.height()) / m_view->height();
+        m_scalingFactor = qMax(xf, yf);
 
-        qreal xf = m_pixmap.width() / preview_width;
-        qreal yf = m_pixmap.height() / preview_height;
-        qreal factor = qMin(xf, yf);
-        m_thumbnail = QPixmap(m_pixmap.size() / factor);
+        m_pixmap.fill(m_view->palette().color(QPalette::Background));
 
         if (!isVisible())
             m_showTimer.start();
@@ -95,25 +83,45 @@ void WebPreview::updatePreview(const QRect& rect)
     QRect r = rect.isEmpty() ? m_view->rect() : rect;
 
     QPainter p(&m_pixmap);
+
+    // comment the next line for old & slow system
+    p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    p.scale(m_scalingFactor, m_scalingFactor);
     m_view->page()->mainFrame()->render(&p, r);
     p.end();
-
-    m_thumbnail = m_pixmap.scaled(m_thumbnail.size(), Qt::IgnoreAspectRatio,
-                                  Qt::SmoothTransformation);
 
     update();
 }
 
 void WebPreview::paintEvent(QPaintEvent *event)
 {
-    QFrame::paintEvent(event);
+    QWidget::paintEvent(event);
 
+    QColor bgcolor = Qt::white;
+    if (m_view)
+        bgcolor = m_view->palette().color(QPalette::Background);
 
-    QPoint topLeft(preview_margin, preview_margin);
-    QRect sourceRect(0, 0, preview_width, preview_height);
+    QPolygon polygon;
+    polygon << QPoint(0, preview_ofs);
+    polygon << QPoint(preview_ofs * 2, preview_ofs);
+    polygon << QPoint(preview_ofs * 2, 0);
+    polygon << QPoint(preview_ofs * 3, preview_ofs);
+    polygon << QPoint(preview_width + 2, preview_ofs);
+    polygon << QPoint(preview_width + 2, preview_height + preview_ofs + 2);
+    polygon << QPoint(0, preview_height + preview_ofs + 2);
+    polygon << QPoint(0, preview_ofs);
 
     QPainter p(this);
-    p.drawPixmap(topLeft, m_thumbnail, sourceRect);
+    p.setOpacity(preview_opacity);
+
+    p.setBrush(bgcolor);
+    p.drawPolygon(polygon);
+    p.drawPixmap(1, preview_ofs + 1, m_pixmap);
+
+    p.setBrush(QBrush());
+    p.setPen(Qt::gray);
+    p.drawPolygon(polygon);
     p.end();
 }
 

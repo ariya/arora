@@ -20,14 +20,14 @@
 #ifndef WEBPREVIEW_H
 #define WEBPREVIEW_H
 
-#include <QFrame>
 #include <QPixmap>
 #include <QPointer>
 #include <QTimer>
+#include <QWidget>
 
 class QWebView;
 
-class WebPreview : public QFrame
+class WebPreview : public QWidget
 {
     Q_OBJECT
 
@@ -42,7 +42,7 @@ protected:
 private:
     QPointer<QWebView> m_view;
     QPixmap m_pixmap;
-    QPixmap m_thumbnail;
+    qreal m_scalingFactor;
     QTimer m_showTimer;
     QTimer m_repaintTimer;
 

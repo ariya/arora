@@ -96,7 +96,7 @@ TabWidget::TabWidget(QWidget *parent)
     , m_lineEditCompleter(0)
     , m_lineEdits(0)
     , m_tabBar(new TabBar(this))
-    , m_preview(new WebPreview)
+    , m_preview(new WebPreview(this))
 {
     setElideMode(Qt::ElideRight);
 
@@ -191,6 +191,8 @@ TabWidget::TabWidget(QWidget *parent)
             this, SLOT(currentChanged(int)));
 
     m_lineEdits = new QStackedWidget(this);
+
+    m_preview->hide();
 }
 
 TabWidget::~TabWidget()
@@ -820,9 +822,10 @@ void TabWidget::updateWebPreview(int tab)
     m_preview->track(webView(tab));
 
     QRect r = tabBar()->tabRect(tab);
-    int x = r.left() + r.width() / 2;
-    int y = r.bottom();
-    m_preview->move(tabBar()->mapToGlobal(QPoint(x, y)));
+    int x = r.left();
+    int y = r.bottom() - 5;
+    QPoint pos = tabBar()->mapToGlobal(QPoint(x, y));
+    m_preview->move(mapFromGlobal(pos));
 }
 
 static const qint32 TabWidgetMagic = 0xaa;
