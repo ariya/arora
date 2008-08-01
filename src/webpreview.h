@@ -22,6 +22,7 @@
 
 #include <QGLWidget>
 #include <QPixmap>
+#include <QPolygon>
 #include <QPointer>
 #include <QTimer>
 #include <QWidget>
@@ -54,6 +55,7 @@ private:
     qreal m_scalingFactor;
     QTimer m_showTimer;
     QTimer m_repaintTimer;
+    QPolygon m_box, m_shadow;
 
 private slots:
     void updatePreview(const QRect &rect = QRect());

@@ -52,7 +52,24 @@ WebPreview::WebPreview(QWidget *parent)
     connect(&m_repaintTimer, SIGNAL(timeout()),
             this, SLOT(updatePreview()));
 
-    setFixedSize(preview_width + 4, preview_height + preview_ofs + 4);
+    setFixedSize(preview_width + 10, preview_height + preview_ofs + 10);
+
+    m_box << QPoint(0, preview_ofs);
+    m_box << QPoint(preview_ofs * 2, preview_ofs);
+    m_box << QPoint(preview_ofs * 2, 0);
+    m_box << QPoint(preview_ofs * 3, preview_ofs);
+    m_box << QPoint(preview_width + 2, preview_ofs);
+    m_box << QPoint(preview_width + 2, preview_height + preview_ofs + 2);
+    m_box << QPoint(0, preview_height + preview_ofs + 2);
+    m_box << QPoint(0, preview_ofs);
+
+    int sw = 2;
+    m_shadow << QPoint(preview_width + 2, preview_ofs + sw);
+    m_shadow << QPoint(preview_width + 2 + sw, preview_ofs + sw);
+    m_shadow << QPoint(preview_width + 2 + sw, preview_height + preview_ofs + 2 + sw);
+    m_shadow << QPoint(sw, preview_height + preview_ofs + 2 + sw);
+    m_shadow << QPoint(sw, preview_height + preview_ofs + 2);
+    m_shadow << QPoint(preview_width + 2, preview_height + preview_ofs + 2);
 }
 
 void WebPreview::track(QWebView *view)
@@ -111,26 +128,18 @@ void WebPreview::paintEvent(QPaintEvent *event)
     if (m_view)
         bgcolor = m_view->palette().color(QPalette::Background);
 
-    QPolygon polygon;
-    polygon << QPoint(0, preview_ofs);
-    polygon << QPoint(preview_ofs * 2, preview_ofs);
-    polygon << QPoint(preview_ofs * 2, 0);
-    polygon << QPoint(preview_ofs * 3, preview_ofs);
-    polygon << QPoint(preview_width + 2, preview_ofs);
-    polygon << QPoint(preview_width + 2, preview_height + preview_ofs + 2);
-    polygon << QPoint(0, preview_height + preview_ofs + 2);
-    polygon << QPoint(0, preview_ofs);
-
     QPainter p(this);
     p.setOpacity(preview_opacity);
 
     p.setBrush(bgcolor);
-    p.drawPolygon(polygon);
+    p.setPen(Qt::gray);
+    p.drawPolygon(m_box);
+
+    p.setBrush(Qt::gray);
+    p.drawPolygon(m_shadow);
+
     p.drawPixmap(1, preview_ofs + 1, m_pixmap);
 
-    p.setBrush(QBrush());
-    p.setPen(Qt::gray);
-    p.drawPolygon(polygon);
     p.end();
 }
 
