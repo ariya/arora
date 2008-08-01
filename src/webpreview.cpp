@@ -86,14 +86,14 @@ void WebPreview::track(QWebView *view)
     } else {
         m_repaintTimer.start();
 
-        qreal xf = qreal(preview_width) / m_view->width();
-        qreal yf = qreal(preview_height) / m_view->height();
+        qreal xf = qreal(2 * preview_width) / m_view->width();
+        qreal yf = qreal(2 * preview_height) / m_view->height();
         m_scalingFactor = qMax(xf, yf);
 
         QString key = m_view->url().toString();
         m_pixmap = m_pixmaps[key];
         if (!m_pixmap) {
-            m_pixmap = new QPixmap(preview_width, preview_height);
+            m_pixmap = new QPixmap(2 * preview_width, 2 * preview_height);
             m_pixmaps.insert(key,  m_pixmap);
         }
 
@@ -112,11 +112,6 @@ void WebPreview::updatePreview(const QRect& rect)
     QRect r = rect.isEmpty() ? m_view->rect() : rect;
 
     QPainter p(m_pixmap);
-
-    // comment the next lines for old & slow system
-    p.setRenderHint(QPainter::Antialiasing, true);
-    p.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
     p.scale(m_scalingFactor, m_scalingFactor);
     m_view->page()->mainFrame()->render(&p, r);
     p.end();
@@ -132,6 +127,7 @@ void WebPreview::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
 #endif
 
+
     QColor bgcolor = Qt::white;
     if (m_view)
         bgcolor = m_view->palette().color(QPalette::Background);
@@ -146,7 +142,7 @@ void WebPreview::paintEvent(QPaintEvent *event)
     p.setBrush(Qt::gray);
     p.drawPolygon(m_shadow);
 
-    p.drawPixmap(1, preview_ofs + 1, *m_pixmap);
+    p.drawPixmap(1, preview_ofs + 1, m_pixmap->scaledToWidth(preview_width, Qt::SmoothTransformation));
 
     p.end();
 }
