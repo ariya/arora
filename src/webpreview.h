@@ -20,6 +20,7 @@
 #ifndef WEBPREVIEW_H
 #define WEBPREVIEW_H
 
+#include <QCache>
 #include <QGLWidget>
 #include <QPixmap>
 #include <QPolygon>
@@ -51,7 +52,8 @@ protected:
 
 private:
     QPointer<QWebView> m_view;
-    QPixmap m_pixmap;
+    QCache<QString, QPixmap> m_pixmaps;
+    QPixmap* m_pixmap;
     qreal m_scalingFactor;
     QTimer m_showTimer;
     QTimer m_repaintTimer;
