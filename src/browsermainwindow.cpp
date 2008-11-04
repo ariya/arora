@@ -478,9 +478,19 @@ void BrowserMainWindow::setupMenu()
     m_reload->setShortcuts(QKeySequence::Refresh);
     m_tabWidget->addWebAction(m_reload, QWebPage::Reload);
 
+#if QT_VERSION >= 0x040500
+    viewMenu->addAction(tr("Zoom &In"), this, SLOT(slotZoomIn()), QKeySequence(Qt::CTRL | Qt::Key_Plus));
+    viewMenu->addAction(tr("Zoom &Out"), this, SLOT(slotZoomOut()), QKeySequence(Qt::CTRL | Qt::Key_Minus));
+    viewMenu->addAction(tr("Reset &Zoom"), this, SLOT(slotResetZoom()), QKeySequence(Qt::CTRL | Qt::Key_0));
+    QAction *zoomTextOnlyAction = viewMenu->addAction(tr("Zoom &Text Only"));
+    connect(zoomTextOnlyAction, SIGNAL(toggled(bool)), this, SLOT(slotSetZoomTextOnly(bool)));
+    zoomTextOnlyAction->setCheckable(true);
+    zoomTextOnlyAction->setChecked(true);
+#else
     viewMenu->addAction(tr("Make Text &Bigger"), this, SLOT(slotViewTextBigger()), QKeySequence(Qt::CTRL | Qt::Key_Plus));
     viewMenu->addAction(tr("Make Text &Normal"), this, SLOT(slotViewTextNormal()), QKeySequence(Qt::CTRL | Qt::Key_0));
     viewMenu->addAction(tr("Make Text &Smaller"), this, SLOT(slotViewTextSmaller()), QKeySequence(Qt::CTRL | Qt::Key_Minus));
+#endif
 
     viewMenu->addSeparator();
     viewMenu->addAction(tr("Page S&ource"), this, SLOT(slotViewPageSource()), tr("Ctrl+Alt+U"));
@@ -937,6 +947,35 @@ void BrowserMainWindow::slotEditFindPrevious()
     tabWidget()->webViewSearch(m_tabWidget->currentIndex())->findPrevious();
 }
 
+#if QT_VERSION >= 0x040500
+void BrowserMainWindow::slotZoomIn()
+{
+    if (!currentTab())
+        return;
+    currentTab()->zoomIn();
+}
+
+void BrowserMainWindow::slotZoomOut()
+{
+    if (!currentTab())
+        return;
+    currentTab()->zoomOut();
+}
+
+void BrowserMainWindow::slotResetZoom()
+{
+    if (!currentTab())
+        return;
+    currentTab()->resetZoom();
+}
+
+void BrowserMainWindow::slotSetZoomTextOnly(bool enable)
+{
+    if (!currentTab())
+        return;
+    currentTab()->page()->settings()->setAttribute(QWebSettings::ZoomTextOnly, enable);
+}
+#else
 void BrowserMainWindow::slotViewTextBigger()
 {
     if (!currentTab())
@@ -957,6 +996,7 @@ void BrowserMainWindow::slotViewTextSmaller()
         return;
     currentTab()->zoomOut();
 }
+#endif
 
 void BrowserMainWindow::slotViewFullScreen(bool makeFullScreen)
 {

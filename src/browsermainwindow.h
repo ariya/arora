@@ -129,9 +129,16 @@ private slots:
     void slotEditFindPrevious();
     void slotShowBookmarksDialog();
     void slotAddBookmark();
+#if QT_VERSION >= 0x040500
+    void slotZoomIn();
+    void slotZoomOut();
+    void slotResetZoom();
+    void slotSetZoomTextOnly(bool enable);
+#else
     void slotViewTextBigger();
     void slotViewTextNormal();
     void slotViewTextSmaller();
+#endif
     void slotViewMenuBar();
     void slotViewToolbar();
     void slotViewBookmarksBar();
